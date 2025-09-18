@@ -1,5 +1,8 @@
 package controller;
 
+import ai.IANivel2;
+import ai.IANivel3;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

@@ -1,5 +1,8 @@
 package view;
 
+import ai.IANivel2;
+import model.board.Move;
+
 import controller.Game;
 import java.awt.*;
 import java.awt.event.*;
@@ -307,48 +310,22 @@ public class ChessGUI extends JFrame {
         aiThinking = true;
         status.setText("Vez: IA — pensando...");
 
-        final int depth = (Integer) depthSpinner.getValue();
-
-        new SwingWorker<Move, Void>() {
+        new SwingWorker<model.board.Move, Void>() {
             @Override
-            protected Move doInBackground() {
-                List<Move> allMoves = collectAllLegalMovesForSide(false);
-                if (allMoves.isEmpty()) {
-                    return null;
-                }
-                if (depth == 1) {
-                    return allMoves.get(rnd.nextInt(allMoves.size()));
-                } else {
-                    int bestScore = Integer.MAX_VALUE;
-                    Move bestMove = null;
-
-                    for (Move move : allMoves) {
-                        game.move(move.from, move.to, null);
-                        int score = evaluateBoard();
-                        game.undoLastMove();
-
-                        if (score < bestScore) {
-                            bestScore = score;
-                            bestMove = move;
-                        }
-                    }
-                    return bestMove;
-                }
+            protected model.board.Move doInBackground() {
+                IANivel2 ia = new IANivel2();
+                return ia.makeMove(game);
             }
 
             @Override
             protected void done() {
                 try {
-                    Move bestMove = get();
+                    model.board.Move bestMove = get();
                     if (bestMove != null && !game.isGameOver() && !game.whiteToMove()) {
-                        lastFrom = bestMove.from;
-                        lastTo = bestMove.to;
-                        Character promo = null;
-                        Piece moving = game.board().get(bestMove.from);
-                        if (moving instanceof Pawn && game.isPromotion(bestMove.from, bestMove.to)) {
-                            promo = 'Q';
-                        }
-                        game.move(bestMove.from, bestMove.to, promo);
+                        lastFrom = bestMove.getFrom();
+                        lastTo = bestMove.getTo();
+                        Character promo = bestMove.getPromotion();
+                        game.move(bestMove.getFrom(), bestMove.getTo(), promo);
                     }
                 } catch (Exception ignored) {
                 } finally {
